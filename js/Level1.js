@@ -158,13 +158,14 @@ var Level1 =
 
 		//player stuff
 		sprite.body.stop();
-		if (game.time.now > hurtTime) sprite.tint = 0xffffff;
+		if (game.time.now > hurtTime) sprite.tint = 0xffffff*game.rnd.frac();
 	    speed = 600 * moveSpeedMultiplier;
 	    if (cursors.left.isDown) sprite.body.velocity.x = -speed;
 	    if (cursors.right.isDown) sprite.body.velocity.x = speed;
 	    if (cursors.up.isDown) sprite.body.velocity.y = -speed;
 	    if (cursors.down.isDown) sprite.body.velocity.y = speed;
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
+	    if (bullets.getFirstExists())bullets.forEachExists(function(bullet){bullet.tint = game.rnd.frac()*0xffffff;});
 
 	    //BOSS FIGHT
 		if(!bossBattle && score > 5000 && !bossKilled) this.prepBoss();
