@@ -1,6 +1,10 @@
 # Shoot
 
-I grabbed a copy of my school project so I can mess with it even after the class.
+I grabbed a copy of my school project so I can mess with it even after the class is over. 
+
+I also renamed it because the old name was dumb.
+
+I plan on replacing the assets as well eventually.
 
 # Installation
 
