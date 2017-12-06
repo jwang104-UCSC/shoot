@@ -24,4 +24,6 @@ Host the build to a local server (`http://localhost:8080/`) with the following c
 $ http-server
 ```
 
-Remember to refresh your cache after changing your code or it won't show up. For Google Chrome this is accomplished by `ctrl + shift + R`.
+Remember to refresh your cache after changing your code or it won't show up. 
+
+For Google Chrome this is accomplished by `ctrl + shift + R`.
