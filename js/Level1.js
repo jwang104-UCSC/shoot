@@ -12,6 +12,7 @@ var Level1 =
 		game.load.image('background', 'assets/images/Level1.png');
 		game.load.image('triangle', 'assets/images/triangle.png');
 		game.load.image('bullet', 'assets/images/bullet.png');
+		game.load.image('laser', 'assets/images/laser.png');
 		game.load.image('enemy', 'assets/images/enemy.png');
 		game.load.image('boss', 'assets/images/boss.png');
 		game.load.spritesheet('explode', 'assets/images/explode.png', 128, 128);
@@ -38,6 +39,7 @@ var Level1 =
 		hurtTime = 0;
 		bossBattle = 0;
 		bossDelay = 0;
+		bossPattern = 0;
 		bossMaxHealth = 1000;
 		bossKilled = false;
 		debug = false;
@@ -101,17 +103,20 @@ var Level1 =
 	        e.visible = false;
 	    }
 
-	    //makes boss
-	    boss = game.add.sprite(0, 0, 'boss');
-	    boss.anchor.setTo(0.5, 0.5);
-	    boss.angle = 180;
-	    boss.exists = false;
-	    boss.visible = false;	
-	    boss.scale.x = 0.6;
-	    boss.scale.y = 0.6;
-	    game.physics.enable(boss, Phaser.Physics.ARCADE);
-		bossHPBar = game.add.sprite(-game.world.width, game.world.height-100, "loadbar");
-		game.physics.enable(bossHPBar, Phaser.Physics.ARCADE);
+		//makes boss laser
+	 	bossLasers = game.add.group();
+	    bossLasers.enableBody = true;
+	    bossLasers.physicsBodyType = Phaser.Physics.ARCADE;
+
+	    for (var i = 0; i < 1000; i++)
+	    { 
+	        var b = bossLasers.create(0, 0, 'laser');
+	        b.name = 'bossLaser' + i;
+	        b.exists = false;
+	        b.visible = false;
+	        b.checkWorldBounds = true;
+	        b.events.onOutOfBounds.add(this.resetFunct, this);
+	    }
 
 		//makes ENEMY bullets
 	 	enemyBullets = game.add.group();
@@ -127,6 +132,20 @@ var Level1 =
 	        b.checkWorldBounds = true;
 	        b.events.onOutOfBounds.add(this.resetFunct, this);
 	    }
+
+	    //makes boss
+	    bossGroup = game.add.group();
+	    boss = game.add.sprite(0, 0, 'boss');
+	    bossGroup.add(boss);
+	    boss.anchor.setTo(0.5, 0.5);
+	    boss.angle = 180;
+	    boss.exists = false;
+	    boss.visible = false;
+	    boss.scale.setTo(0.6,0.6);
+	    game.physics.enable(boss, Phaser.Physics.ARCADE);
+		bossHPBar = game.add.sprite(-game.world.width, game.world.height-100, "loadbar");
+		game.physics.enable(bossHPBar, Phaser.Physics.ARCADE);
+		
 	    //make explosions
 	    explosions = game.add.group();
 	    explosions.createMultiple(200, 'explode');
@@ -182,6 +201,7 @@ var Level1 =
 	    //collision tests
 	    game.physics.arcade.overlap(bullets, enemies, this.bulletHit, null, this);
 	    game.physics.arcade.overlap(sprite, enemyBullets, this.enemyHitsPlayer, null, this);
+	    game.physics.arcade.overlap(sprite, bossLasers, this.enemyHitsPlayer, null, this);
 	    game.physics.arcade.overlap(bullets, boss, bossHurt, null, this);
 	    game.physics.arcade.overlap(drops, sprite, this.dropCollected, null, this);
 	    game.physics.arcade.overlap(sprite, enemies, this.shipCollision, null, this);
