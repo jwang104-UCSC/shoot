@@ -79,7 +79,6 @@ function prepBoss5(){
     	bulletTime = game.time.now;
     	musBoss.play('', 0, 0.3, true, true);
 	}
-	//var tween = game.add.tween(boss).to( { x: 200 }, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
 }
 function prepBoss6(){
 	bossBattle = 6;
@@ -129,8 +128,6 @@ function bossHurt(boss, shot){
     	if(bossBattle == 6){
 	    	shot.kill();
 		    bossHealth-=2;
-		    //console.log("ratio = " + bossHealth/maxBossHealth + "\n width = " + bossHPBar.width);
-		    //bossHPBar.width = game.world.width-game.world.width*(1-bossHealth/maxBossHealth);
 		    bossHPBar.width = game.world.width*(bossHealth/bossMaxHealth);
 		    //console.log(bossHPBar.width);
 		    if (bossHealth <= 0){
