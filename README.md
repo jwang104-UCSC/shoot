@@ -2,9 +2,9 @@
 
 I grabbed a copy of my school project so I can mess with it even after the class is over. 
 
-I also renamed it because the old name was dumb.
+I also renamed it because ~~the old name was dumb~~ I didn't like the old name.
 
-I plan on replacing the assets as well eventually.
+I plan on replacing the assets as well eventually, since most of these are "borrowed" from other places.
 
 # Installation
 
