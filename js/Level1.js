@@ -1,3 +1,6 @@
+var sounds = document.getElementsByTagName('audio');
+for(i=0; i<sounds.length; i++) sounds[i].pause();
+
 var Level1 = 
 {
 	
@@ -16,6 +19,12 @@ var Level1 =
  	},
 	create: function()
 	{	
+		music = game.add.audio('musGun');
+		musBoss = game.add.audio('musBoss');
+		sfxBossDeath = game.add.audio('sfxMelting')
+		//sfxExplode = game.add.audio('sfxExplode');
+		music.play('', 0, 0.3, true, true);
+
 		//Setup gameplay numbers here
 		shootRateMultiplier = 1;
 		shotSpeedMultiplier = 1;
@@ -29,6 +38,7 @@ var Level1 =
 		hurtTime = 0;
 		bossBattle = 0;
 		bossDelay = 0;
+		bossMaxHealth = 1000;
 		bossKilled = false;
 		debug = false;
 		//gameplay-related numbers end
@@ -100,7 +110,6 @@ var Level1 =
 	    boss.scale.x = 0.6;
 	    boss.scale.y = 0.6;
 	    game.physics.enable(boss, Phaser.Physics.ARCADE);
-	    bossHealth = 1.00;
 		bossHPBar = game.add.sprite(-game.world.width, game.world.height-100, "loadbar");
 		game.physics.enable(bossHPBar, Phaser.Physics.ARCADE);
 
@@ -109,7 +118,7 @@ var Level1 =
 	    enemyBullets.enableBody = true;
 	    enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 50; i++)
+	    for (var i = 0; i < 1000; i++)
 	    { 
 	        var b = enemyBullets.create(0, 0, 'bullet');
 	        b.name = 'evilBullet' + i;
@@ -150,7 +159,7 @@ var Level1 =
 		//enemies stuff
 		if (game.time.now > spawnTime && !bossBattle && !debug) this.makeEnemy();
 		if (game.time.now > firingTime && !debug) this.enemyShoot();
-		if (game.time.now > firingTime && bossBattle == 5 &&!debug) this.bossShoot();
+		if (game.time.now > firingTime && bossBattle == 6 &&!debug) bossShoot();
 
 		//UI stuff
 		scoreText.text = scoreString + score;
@@ -167,31 +176,13 @@ var Level1 =
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
 
 	    //BOSS FIGHT
-		if(!bossBattle && score > 5000 && !bossKilled) this.prepBoss();
-	    if (bossBattle == 1 && enemies.getFirstExists()) this.prepBoss2();
-	    if (bossBattle == 2) this.prepBoss3();
-	    if (boss.body.y >= game.world.centerY - 600 && bossBattle == 3){
-	    	bossDelay = game.time.now + 700;
-	    	bossDelay = game.time.now + 0;
-	    	boss.body.stop();
-	    	bossBattle = 3.5;
-	    }
-	    if (bossBattle == 3.5) this.prepBoss4();
-	    if (bossHPBar.body.x >= 0 && bossBattle == 4){
-   	 		bossDelay = game.time.now + 800;
-	    	bossHPBar.body.stop();
-	    	bossBattle = 4.5;
-	    }
-	    if (bossBattle == 4.5) this.prepBoss5();
-	    if (bossBattle == 5) bossHPBar.body.velocity.x = -1200;
-	    if (bossBattle == "BOSS IS KILL") this.bossExplode();
-		if (bossBattle == "BOSS IS KILL" && bossExplodeCount >10) this.bossEnd();
+		bossFight();
 
 
 	    //collision tests
 	    game.physics.arcade.overlap(bullets, enemies, this.bulletHit, null, this);
 	    game.physics.arcade.overlap(sprite, enemyBullets, this.enemyHitsPlayer, null, this);
-	    game.physics.arcade.overlap(bullets, boss, this.bossHurt, null, this);
+	    game.physics.arcade.overlap(bullets, boss, bossHurt, null, this);
 	    game.physics.arcade.overlap(drops, sprite, this.dropCollected, null, this);
 	    game.physics.arcade.overlap(sprite, enemies, this.shipCollision, null, this);
 	    game.physics.arcade.overlap(sprite, boss, this.killFunct, null, this);
@@ -235,115 +226,7 @@ var Level1 =
 	    }
 	},
 	//BOSS FIGHT
-	prepBoss: function() {
-		bossBattle = 1;
-		firingTime+=5000;
-		bulletTime+=99999999;
-		bullets.killAll();
-		enemyBullets.killAll();
-		drops.killAll();
-	    enemies.forEachAlive(function(enemy){enemy.body.stop();});
-		explodeDelay = 0;
-	},
-	prepBoss2: function() 
-	{	
-		if(victim = enemies.getRandomExists()){
-			if(game.time.now > explodeDelay){
-				this.explodeFunct(victim.x, victim.y);
-				victim.kill();
-				explodeDelay = game.time.now +150;
-			}
-		}
-		if(!enemies.getFirstExists()) bossBattle = 2;
-	},
-	prepBoss3: function() 
-	{	
-		bossBattle = 3;
-	    boss.reset(game.world.centerX, -boss.height);
-	    boss.body.velocity.y = 1000;
-	},
-	prepBoss4: function() 
-	{	
-		if(game.time.now > bossDelay){
-			redBar = game.add.sprite(-game.world.width-1100, game.world.height-100, "loadbar");
-			bossHPBar.width = game.world.width;
-			redBar.width = game.world.width*1.5;
-			redBar.tint = 0xff0000
-			bossHPBar.anchor.setTo(0,0);
-			game.physics.enable(redBar, Phaser.Physics.ARCADE);
-			bossHPBar.body.velocity.x = 1400;
-			redBar.body.velocity.x = 1400;
-			bossBattle = 4;
-		}
-	},
-	prepBoss5: function() 
-	{	
-		if(game.time.now > bossDelay){
-	    	bossBattle = 5;
-	    	redBar.kill();
-	    	bossHPBar.tint = 0xff0000;
-	    	bossHPBar.body.collideWorldBounds = true;
-	    	bulletTime = game.time.now;
-		}
-	},
-	bossShoot: function(){
-		var bullet = enemyBullets.getFirstExists(false)
-		if (bullet) {
-              bullet.reset(boss.x, boss.y+150);
-              bullet.tint = 0xff0000;
-	       	  bullet.body.velocity.y = 1000;
-
-	       	  var offsetx = game.rnd.integerInRange(-50, 50);
-		      var offsety = game.rnd.integerInRange(-50, 50);
-
-	       	  game.physics.arcade.moveToXY(bullet,sprite.body.x + offsetx, sprite.body.y + offsety,200);
-	       	  firingTime = game.time.now + 250;
-        }
-	},
-	bossDeath: function() 
-	{	
-		bossHPBar.kill();
-		score+=9001;
-		bossBattle = "BOSS IS KILL";
-		bossKilled = true;
-		bossExplodeCount = 0;
-	},
-	bossExplode: function() 
-	{	
-		if(game.time.now > bossDelay){
-			var xoffset = game.rnd.integerInRange(-250, 250);
-			var yoffset = game.rnd.integerInRange(-250, 250);
-			this.explodeFunct(boss.body.x+xoffset, boss.body.y+yoffset);
-			bossDelay = game.time.now + 100;
-			bossExplodeCount++;
-		}
-	},
-	bossEnd: function() 
-	{	
-		boss.kill();
-		bossBattle= 0;
-	},
-	//previous bossHurt hitbox was off fixed it so that it wouldn't the lower quadrants 
-	bossHurt: function(boss, shot) {
-
-	    if ((shot.x > boss.x + boss.width / 5 &&
-	        shot.y > boss.y) ||
-	        (shot.x < boss.x - boss.width / 5 &&
-	        shot.y > boss.y)) {
-	      return false;
-	    } 
-	    else {
-	    	if(bossBattle == 5){
-		    	shot.kill();
-			    bossHealth-=0.02;
-			    bossHPBar.width = game.world.width-game.world.width*(1-bossHealth);
-			    if (bossHealth <= 0){
-			    	this.bossDeath();
-			    }
-	    	}
-		    
-	    }
-	},
+	
 	setupBoom: function(boom) 
 	{
 		boom.anchor.x = 0.3;
@@ -351,9 +234,12 @@ var Level1 =
 		boom.animations.add('explode');
 	},
 	enemyHitsPlayer: function(player, shot) {
-		//kill bullet sprites
+		if ((shot.x > player.x + player.width / 5 && shot.y < player.y) ||
+		    (shot.x < player.x - player.width / 5 && shot.y < player.y)) return false;
+		else { 
 	    shot.kill();
 	    this.killFunct();
+		}
 	},
 	bulletHit: function(shot, victim) {
 		//kill both sprites
@@ -365,7 +251,7 @@ var Level1 =
 	    scoreText.text = scoreString + score;
 
 	    //explode
-	    this.explodeFunct(victim.body.x+50, victim.body.y+50);
+	    explodeFunct(victim.body.x+50, victim.body.y+50);
 
 	    //RNG to see if victim drops something
 	    var i = game.rnd.integerInRange(0, 100);
@@ -419,7 +305,7 @@ var Level1 =
 		if(game.time.now > hurtTime){
 		    if (lives>-1)
 		    {
-			    this.explodeFunct(sprite.body.x+15, sprite.body.y+15);
+			    explodeFunct(sprite.body.x+15, sprite.body.y+15);
 			    lives--;
 			    hurtTime = game.time.now + iFrames*100;
 			    sprite.tint = 0x0099ff;
@@ -451,13 +337,6 @@ var Level1 =
 	resetFunct: function(object){
 		//console.log(object.name+" just reset");
 		object.kill();
-	},
-	explodeFunct: function(x, y){
-		var explosion = explosions.getFirstExists(false);
-	    explosion.reset(x, y);
-	    explosion.scale.setTo(1.4, 1.4);
-	    explosion.alpha = 0.5;
-	    explosion.play('explode', 30, false, true);
 	},
 	testEnemies: function(){
 		for(var i = 0; i<6; i++){
@@ -531,6 +410,7 @@ var Level1 =
 			this.removeButton(gameOverBtn);
 			this.removeButton(restartBtn);
 			this.removeButton(killBossBtn);
+			this.removeButton(godModeBtn);
 			this.pauseFunct();
 		}//if not paused, pause and make menu
 		else{
@@ -546,15 +426,17 @@ var Level1 =
 		spawnBtn = this.createButton("Spawn enemies",game.world.centerX-360,game.world.centerY+30,
 						 300, 100, function(){this.testEnemies(); console.log("Enemies spawned");});
 		spawnBossBtn = this.createButton("Spawn boss",game.world.centerX-360,game.world.centerY+180,
-						 300, 100, function(){this.prepBoss(); console.log("BOSS TIME");});
+						 300, 100, function(){prepBoss(); console.log("BOSS TIME");});
 		gameOverBtn = this.createButton("Game Over",game.world.centerX,game.world.centerY+30,
 						 300, 100, function(){this.devMenu(); this.gameOver(); console.log("Game over");});
 		restartBtn = this.createButton("Restart",game.world.centerX,game.world.centerY+180,
-						 300, 100, function(){game.state.start('Level1'); game.paused = false;});
+						 300, 100, function(){restart(); game.paused = false;});
 		killAllBtn = this.createButton("Kill enemies",game.world.centerX+360,game.world.centerY+30,
 						 300, 100, function(){this.debugKillAll(); console.log("Enemies killed");});
 		killBossBtn = this.createButton("Kill boss",game.world.centerX+360,game.world.centerY+180,
-						 300, 100, function(){this.bossDeath(); console.log("Boss killed");});
+						 300, 100, function(){bossDeath(); console.log("Boss killed");});
+		godModeBtn = this.createButton("God mode",game.world.centerX,game.world.centerY+330,
+						 300, 100, function(){iFrames = 100; lives = 1337; console.log("iFrames = 100\n lives = 1337");});
 		}
 	},
 	debugToggle: function(){
@@ -565,7 +447,7 @@ var Level1 =
 	},
 	debugKillAll: function(){
 		while(victim =  enemies.getFirstExists(true)){
-				this.explodeFunct(victim.x, victim.y);
+				explodeFunct(victim.x, victim.y);
 				victim.kill();
 		}
 	},
@@ -582,7 +464,7 @@ var Level1 =
 						 string, {font:"120px Verdana", fill: "#FFF",align:"center"})
 
 		restartBtn = this.createButton("Restart",game.world.centerX,game.world.centerY+292,
-						 300, 100, function(){game.state.start('Level1'); game.paused = false;});
+						 300, 100, function(){restart(); game.paused = false;});
 		menuBtn = this.createButton("Menu",game.world.centerX,game.world.centerY+132, 300,
 						 100, function(){game.state.start('MainMenu'); game.paused = false;});
 		}
@@ -602,7 +484,7 @@ var Level1 =
 		resumeBtn = this.createButton("Resume",game.world.centerX+275,game.world.centerY+32,
 						 300, 100, this.pauseMenu);
 		restartBtn = this.createButton("Restart",game.world.centerX+275,game.world.centerY+192,
-						 300, 100, function(){game.state.start('Level1'); game.paused = false;});
+						 300, 100, function(){restart(); game.paused = false;});
 		menuBtn = this.createButton("Menu",game.world.centerX-275,game.world.centerY+32,
 						 300, 100, function(){game.state.start('MainMenu'); game.paused = false;});
 		}
@@ -651,7 +533,7 @@ var Level1 =
 			this.pauseMenu();
 		}
 		if(char == 'r' && game.paused){
-			game.state.start('Level1');
+			restart();
 			game.paused = false;
 		}
 		if(char == 'c' && game.paused && stateVar!= "END"){
@@ -679,3 +561,17 @@ var Level1 =
 		return x;
 	}
 };
+//REFACTORING BEGINS WOOOOO
+function explodeFunct(x, y){
+	var explosion = explosions.getFirstExists(false);
+    explosion.reset(x, y);
+    explosion.scale.setTo(1.4, 1.4);
+    explosion.alpha = 0.5;
+    explosion.play('explode', 30, false, true);
+    //explodeSFX.play('', 0, 0.5, false, true);
+}
+function restart(){
+	music.stop();
+	musBoss.stop();
+	game.state.restart();
+}

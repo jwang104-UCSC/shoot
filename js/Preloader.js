@@ -9,9 +9,13 @@ var Preloader = {
 		game.load.spritesheet('button', 'assets/images/flixel-button.png', 80, 20);
 		game.load.image('title', 'assets/images/title.png');
 		game.load.image('pause', 'assets/images/pause.png');
+		game.load.audio('musGun', 'assets/sfx/mus107.ogg');
+		game.load.audio('musBoss', 'assets/sfx/musBoss4A.ogg');
+		game.load.audio('sfxMelting', 'assets/sfx/sndMeltingUltraA.ogg');
+		//game.load.audio('sfxExplode', 'assets/sfx/explode.ogg');
 	},
 	create: function()
 	{
-		game.state.start("MainMenu");
+		game.state.start("Level1");
 	}
 }
