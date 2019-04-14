@@ -1,5 +1,7 @@
 # Shoot
 
+Shoot is a simple shoot-em-up written in Javascript, using the Phaser framework.
+
 I grabbed a copy of my school project so I can mess with it even after the class is over. 
 
 I plan on replacing the assets as well eventually, since most of these are "borrowed" from other places.
